@@ -4,6 +4,9 @@ import PlanetsContext from '../context/PlanetsContext';
 
 let resultFilter;
 
+let columns = ['population', 'orbital_period', 'diameter',
+  'rotation_period', 'surface_water'];
+
 export default function Table() {
   const [textFilter, changeText] = useState('');
   const [newNumberFilter, changeNewFilter] = useState({
@@ -12,8 +15,14 @@ export default function Table() {
     value: 0,
   });
 
+  // faz a logica que aplica um filtro individual(numerico), no resultado da ultima filtragem && impede que filtros repetidos sejam usados
+
   const finalFilterFunction = (singNumericFilter) => {
-    // console.log(singNumericFilter.comparison);
+    columns = columns.filter((column) => column !== singNumericFilter.column);
+    changeNewFilter({
+      ...newNumberFilter,
+      column: columns[0],
+    });
     switch (singNumericFilter.comparison) {
     case 'maior que':
       resultFilter = resultFilter.filter((p) => Number(p[singNumericFilter.column])
@@ -29,6 +38,8 @@ export default function Table() {
       break;
     }
   };
+
+  // ve se a ultima atualização de estado foi pelo click, ou escrita, e depois passa por cada filtro chamando a função
 
   const numberFilter = (filterByNumericValues = [],
     target) => {
@@ -50,6 +61,7 @@ export default function Table() {
     }
   };
 
+  // seta o filtro de texto, muda o valor do obj dos filtros numerios e define o valor final do filtro
   const filters = (planets, filterPlanets, target = textFilter,
     numericFilterInfo) => {
     const filterByNumericValues = numericFilterInfo[1];
@@ -69,9 +81,8 @@ export default function Table() {
     }
     numberFilter(filterByNumericValues, target);
     filterPlanets(resultFilter);
-    console.log(resultFilter.length);
   };
-
+  // chamado ao clicar no botão
   const updateNumericFiltersArray = (planets, filterPlanets,
     changeNumberFilter, filterByNumericValues) => {
     const numericFilterInfo = [changeNumberFilter, filterByNumericValues];
@@ -111,11 +122,9 @@ export default function Table() {
             value={ newNumberFilter.column }
             onChange={ (target) => updateNumberFilterState(target) }
           >
-            <option>population</option>
-            <option>orbital_period</option>
-            <option>diameter</option>
-            <option>rotation_period</option>
-            <option>surface_water</option>
+            {
+              columns.map((column, i) => <option key={ i }>{ column }</option>)
+            }
           </select>
           <select
             name="comparison"

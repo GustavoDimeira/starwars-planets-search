@@ -4,8 +4,9 @@ import PlanetsContext from '../context/PlanetsContext';
 
 let resultFilter;
 
-let columns = ['population', 'orbital_period', 'diameter',
+const columnsFixed = ['population', 'orbital_period', 'diameter',
   'rotation_period', 'surface_water'];
+let columns = [...columnsFixed];
 
 export default function Table() {
   const [textFilter, changeText] = useState('');
@@ -42,19 +43,23 @@ export default function Table() {
   // ve se a ultima atualização de estado foi pelo click, ou escrita, e depois passa por cada filtro chamando a função
 
   const numberFilter = (filterByNumericValues = [],
-    target) => {
+    target, removing) => {
     if (target !== textFilter) {
       filterByNumericValues.forEach((singNumericFilter) => {
         finalFilterFunction(singNumericFilter);
       });
     } else {
-      const temp = [...filterByNumericValues,
-        {
-          column: newNumberFilter.column,
-          comparison: newNumberFilter.comparison,
-          value: newNumberFilter.value,
-        },
-      ];
+      let temp = [...filterByNumericValues];
+      if (!removing) {
+        temp = [...filterByNumericValues,
+          {
+            column: newNumberFilter.column,
+            comparison: newNumberFilter.comparison,
+            value: newNumberFilter.value,
+          },
+        ];
+      }
+      columns = [...columnsFixed];
       temp.forEach((singNumericFilter) => {
         finalFilterFunction(singNumericFilter);
       });
@@ -66,10 +71,11 @@ export default function Table() {
     numericFilterInfo) => {
     const filterByNumericValues = numericFilterInfo[1];
     const changeNumberFilter = numericFilterInfo[0];
+    const removing = numericFilterInfo[2];
     // name Filter
     resultFilter = planets.filter((planet) => planet.name.includes(target));
     // number filter
-    if (changeNumberFilter) {
+    if (changeNumberFilter && !removing) {
       changeNumberFilter((prev) => [
         ...prev,
         {
@@ -79,7 +85,7 @@ export default function Table() {
         },
       ]);
     }
-    numberFilter(filterByNumericValues, target);
+    numberFilter(filterByNumericValues, target, removing);
     filterPlanets(resultFilter);
   };
   // chamado ao clicar no botão
@@ -100,6 +106,19 @@ export default function Table() {
     changeText(() => target.value);
     const numericFilterInfo = [undefined, filterByNumericValues];
     filters(planets, filterPlanets, target.value, numericFilterInfo);
+  };
+
+  const removeItem = (index, filterByNumericValues, changeNumberFilter, filterInfos) => {
+    filterByNumericValues.splice(index, 1);
+    changeNumberFilter(filterByNumericValues);
+    const numericFilterInfo = [changeNumberFilter, filterByNumericValues, true];
+    filters(filterInfos[0], filterInfos[1], undefined, numericFilterInfo);
+  };
+
+  const removeAll = (planets, filterPlanets, changeNumberFilter) => {
+    filterPlanets(planets);
+    changeNumberFilter([]);
+    columns = [...columnsFixed];
   };
 
   return (
@@ -153,8 +172,44 @@ export default function Table() {
               updateNumericFiltersArray(planets, filterPlanets,
                 changeNumberFilter, filterByNumericValues);
             } }
+            disabled={ !columns[0] }
           >
             Adicionar
+          </button>
+          {
+            filterByNumericValues.map((singleFilter, i) => {
+              const filterInfos = [planets, filterPlanets];
+              return (
+                <div
+                  key={ i }
+                  data-testid="filter"
+                >
+                  <p>
+                    { singleFilter.column }
+                    <br />
+                    { singleFilter.comparison }
+                    <br />
+                    { singleFilter.value }
+                  </p>
+                  <button
+                    type="button"
+                    onClick={ () => {
+                      removeItem(i, filterByNumericValues,
+                        changeNumberFilter, filterInfos);
+                    } }
+                  >
+                    X
+                  </button>
+                </div>
+              );
+            })
+          }
+          <button
+            type="button"
+            data-testid="button-remove-filters"
+            onClick={ () => removeAll(planets, filterPlanets, changeNumberFilter) }
+          >
+            Remover todas filtragens
           </button>
         </div>
       )}

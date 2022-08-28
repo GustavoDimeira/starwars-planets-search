@@ -6,7 +6,18 @@ import PlanetsContext from './PlanetsContext';
 function PlanetsProvider({ children }) {
   const [planets, addPlanets] = useState([{}]);
   const [filterdPlanets, filterPlanets] = useState([{}]);
+  const [filterByNumericValues, changeNumberFilter] = useState([]);
 
+  /*
+      {
+  filterByNumericValues: [
+    {
+      column: 'population',
+      comparison: 'maior que',
+      value: '100000',
+    }
+  ]
+}  */
   useEffect(() => {
     fetch('https://swapi-trybe.herokuapp.com/api/planets/')
       .then((request) => request.json())
@@ -26,6 +37,8 @@ function PlanetsProvider({ children }) {
     planets,
     filterPlanets,
     filterdPlanets,
+    filterByNumericValues,
+    changeNumberFilter,
   };
 
   return (

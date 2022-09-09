@@ -73,7 +73,11 @@ export default function Table() {
     const changeNumberFilter = numericFilterInfo[0];
     const removing = numericFilterInfo[2];
     // name Filter
-    resultFilter = planets.filter((planet) => planet.name.includes(target));
+    resultFilter = planets.filter((planet) => {
+      const planetName = planet.name.toLowerCase();
+      const targetValue = target.toLowerCase();
+      return planetName.includes(targetValue);
+    });
     // number filter
     if (changeNumberFilter && !removing) {
       changeNumberFilter((prev) => [
@@ -192,6 +196,7 @@ export default function Table() {
                     { singleFilter.value }
                   </p>
                   <button
+                    data-testid={ `btnX-${i}` }
                     type="button"
                     onClick={ () => {
                       removeItem(i, filterByNumericValues,

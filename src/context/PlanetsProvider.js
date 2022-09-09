@@ -19,8 +19,7 @@ function PlanetsProvider({ children }) {
       .then((final) => {
         addPlanets(final);
         filterPlanets(final);
-      })
-      .catch((erro) => console.log(erro));
+      });
   }, []);
 
   const context = {

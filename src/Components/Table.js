@@ -5,7 +5,9 @@ export default function Table() {
   return (
     <PlanetsContext.Consumer>
       {({ filterdPlanets }) => (
-        <table>
+        <table
+          data-testid="planets-table"
+        >
           <thead>
             <tr>
               <th>Name</th>
@@ -26,7 +28,10 @@ export default function Table() {
           <tbody>
             {
               filterdPlanets.map((planet, i) => (
-                <tr key={ i }>
+                <tr
+                  key={ i }
+                  data-testid="planetsList"
+                >
                   <th>{ planet.name }</th>
                   <th>{ planet.rotation_period }</th>
                   <th>{ planet.orbital_period }</th>
